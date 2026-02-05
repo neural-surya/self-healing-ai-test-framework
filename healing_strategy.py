@@ -3,7 +3,7 @@ from playwright.sync_api import Page, TimeoutError as PlaywrightTimeoutError
 from config import ELEMENT_MAPPING, REGION_SELECTORS
 from utils.semantic_healing import try_semantic_fallback
 from utils.visual_healing import try_visual_fallback, get_or_capture_template
-
+from utils.groq_lpu_healing import try_lpu_healing
 
 def find_locator_with_healing(page: Page, primary_selector: str) -> dict | None:
     """
@@ -27,7 +27,19 @@ def find_locator_with_healing(page: Page, primary_selector: str) -> dict | None:
         print("→ Success with primary locator!")
         return {'type': 'locator', 'value': locator}
     except PlaywrightTimeoutError:
-        print("→ Primary failed → semantic fallback...")
+        print("→ Primary failed → semantics fallback...")
+
+    # # LPU Locator
+    # lpu_locator = try_lpu_healing(page, semantic_desc)
+    # if lpu_locator:
+    #     try:
+    #         print("→ Success with semantic fallback! Locator is: ", lpu_locator)
+    #         return {'type': 'locator', 'value': lpu_locator}
+    #     except Exception as e:
+    #         print(f"Click failed even after semantic match: {e}")
+    #
+    # print("→ lpu failed → visual fallback...")
+
 
     # Semantic fallback
     semantic_locator = try_semantic_fallback(page, semantic_desc)

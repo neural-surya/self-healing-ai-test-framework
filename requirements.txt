@@ -6,3 +6,4 @@ opencv-python
 numpy
 beautifulsoup4
 torch  # usually installed with sentence-transformers, but explicit for safety
+python-dotenv

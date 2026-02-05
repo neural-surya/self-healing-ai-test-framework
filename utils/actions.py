@@ -1,5 +1,5 @@
 from playwright.sync_api import Page, Locator, TimeoutError as PlaywrightTimeoutError
-
+from bs4 import BeautifulSoup
 
 def perform_action(page: Page, result: dict | None, action: str, *args, **kwargs) -> bool:
     """
@@ -104,7 +104,6 @@ def perform_action(page: Page, result: dict | None, action: str, *args, **kwargs
         print(f"Action '{action}' failed: {str(e)}")
         return False
 
-
 def click_element_or_coordinates(page: Page, result: dict | None) -> bool:
     """
     Convenience method: Click using locator or coordinates from healing result.
@@ -141,3 +140,30 @@ def click_element_or_coordinates(page: Page, result: dict | None) -> bool:
     else:
         print(f"Unsupported result type for click: {result.get('type')}")
         return False
+
+def find_candidates(page: Page):
+    try:
+        html = page.content()
+        soup = BeautifulSoup(html, 'html.parser')
+        candidate_tags = ['button', 'a', 'div[role="button"]', 'input[type="submit"]', 'input[type="button"]']
+        candidates = []
+
+        for tag in candidate_tags:
+            for elem in soup.select(tag):
+                text = elem.get_text(strip=True)
+                if not text:
+                    continue
+                attrs = ' '.join([f"{k}={v}" for k, v in elem.attrs.items() if isinstance(v, str)])
+                combined = f"{text} {attrs}".strip()
+                if combined:
+                    candidates.append(combined)
+
+        if not candidates:
+            print("No candidate elements found for semantic search.")
+            return None
+
+        print(f"Found {len(candidates)} candidates for LPU intake")
+        return candidates
+
+    except Exception as e:
+        return None

@@ -1,15 +1,18 @@
 # config.py
 import os
+from dotenv import load_dotenv
+load_dotenv()
+
 from sentence_transformers import SentenceTransformer
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 # Load model once (shared across modules)
 SEMANTIC_MODEL = SentenceTransformer('all-MiniLM-L6-v2')
-
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 # Mapping: primary_selector → (semantic_description, template_path)
 ELEMENT_MAPPING = {
     "#checkout-btn": ("checkout button", "templates/checkout_button_template.png"),
     'button:has-text("Login")': (          # ← Primary locator (Playwright text engine)
-        "log out button",
+        "log in button",
         os.path.join(PROJECT_ROOT, "templates", "login_button_template.png") # ← Visual template path (tight crop of the button)
     ),
     'button:has-text("Sign Up")': (          # ← Primary locator (Playwright text engine)

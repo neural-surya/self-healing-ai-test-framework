@@ -2,6 +2,7 @@
 from bs4 import BeautifulSoup
 from playwright.sync_api import Page, Locator
 from sentence_transformers import util
+import time
 import numpy as np
 from config import SEMANTIC_MODEL, SEMANTIC_THRESHOLD
 
@@ -10,6 +11,7 @@ def try_semantic_fallback(page: Page, semantic_desc: str) -> Locator | None:
     Scans interactive elements semantically and returns a locator to the best match.
     Returns None if no good match is found.
     """
+    candidates = []
     try:
         html = page.content()
         soup = BeautifulSoup(html, 'html.parser')
@@ -35,6 +37,7 @@ def try_semantic_fallback(page: Page, semantic_desc: str) -> Locator | None:
 
         print(f"Found {len(candidates)} candidates. Computing semantic similarity...")
 
+        start_cpu = time.perf_counter()
         target_embedding = SEMANTIC_MODEL.encode(semantic_desc, convert_to_tensor=True)
         cand_embeddings = SEMANTIC_MODEL.encode(candidates, convert_to_tensor=True)
         similarities = util.cos_sim(target_embedding, cand_embeddings)[0]
@@ -56,8 +59,10 @@ def try_semantic_fallback(page: Page, semantic_desc: str) -> Locator | None:
         else:
             selector = f"//*[contains(text(), '{text[:30]}')]"
 
-        print(f"→ Semantic match! Score: {best_score:.3f} | Text: '{text[:60]}' | Selector: {selector}")
+        cpu_latency = (time.perf_counter() - start_cpu) * 1000
+        print("CPU Latency is ", cpu_latency)
 
+        print(f"→ Semantic match! Score: {best_score:.3f} | Text: '{text[:60]}' | Selector: {selector}")
         return page.locator(selector).first
 
     except Exception as e:
