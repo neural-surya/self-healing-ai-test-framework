@@ -13,6 +13,18 @@ This project implements a self-healing test automation framework using Playwrigh
 *   **Region-Restricted Search:** Supports restricting visual searches to specific regions of the page to reduce false positives.
 *   **Pytest Integration:** Uses Pytest fixtures for browser and page management.
 
+## Groq LPU Integration
+
+The framework includes support for Groq LPU (Language Processing Unit) inferencing, which is referenced in `utils/groq_lpu_healing.py`. This allows for ultra-fast semantic matching using LLMs hosted on Groq's hardware.
+
+To enable Groq LPU healing:
+1.  Open `healing_strategy.py`.
+2.  Uncomment the code block under `# LPU Locator` inside the `find_locator_with_healing` function.
+3.  Ensure you have configured your `GROQ_API_KEY` in `config.py`.
+
+**Performance:**
+When tested, the Groq LPU processed the request in just **~82ms**, whereas using the local sentence transformer took **325ms**. This confirms that LPU inferencing is much faster.
+
 ## Project Structure
 
 *   `healing_strategy.py`: Core logic for the multi-tier healing strategy.
@@ -22,6 +34,7 @@ This project implements a self-healing test automation framework using Playwrigh
     *   `actions.py`: Helper functions to perform actions (click, type, etc.) on locators or coordinates.
     *   `semantic_healing.py`: Implementation of the semantic fallback mechanism.
     *   `visual_healing.py`: Implementation of the visual fallback mechanism using OpenCV.
+    *   `groq_lpu_healing.py`: Implementation of the semantic healing using Groq LPU.
 *   `tests/`: Contains test scripts.
     *   `test_login_self_healing.py`: Example test demonstrating self-healing on a login button.
 *   `templates/`: Directory to store image templates for visual matching.
